@@ -1,0 +1,579 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Perfume Lab | Trợ lý nước hoa AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #f7f5f1;
+            color: #292820;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.65;
+        }
+
+        .container {
+            width: min(1100px, 92%);
+            margin: auto;
+            padding: 36px 0 48px;
+        }
+
+        header { text-align: center; margin-bottom: 30px; }
+
+        .eyebrow {
+            color: #8b795d;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            margin: 8px 0;
+            font-size: clamp(30px, 5vw, 44px);
+            line-height: 1.2;
+        }
+
+        h2 { margin-top: 0; font-size: 22px; }
+
+        .subtitle {
+            max-width: 700px;
+            margin: 12px auto;
+            color: #69675f;
+        }
+
+        .panel {
+            margin-bottom: 24px;
+            padding: 26px;
+            background: #fff;
+            border: 1px solid #e9e4da;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px #29282008;
+        }
+
+        .section-label {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #8b795d;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .hint { color: #77746b; font-size: 14px; }
+
+        textarea {
+            width: 100%;
+            min-height: 115px;
+            margin: 10px 0 14px;
+            padding: 14px;
+            border: 1px solid #d9d4c9;
+            border-radius: 10px;
+            font: inherit;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: 2px solid #b8a27e;
+            border-color: transparent;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: 0;
+            border-radius: 9px;
+            background: #514936;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover { background: #393326; }
+        button:disabled { opacity: .6; cursor: wait; }
+
+        .question-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 14px 0;
+        }
+
+        .example-button {
+            padding: 9px 12px;
+            border: 1px solid #e3ddd1;
+            background: #faf8f4;
+            color: #514936;
+            font-size: 13px;
+            font-weight: normal;
+            text-align: left;
+        }
+
+        .example-button:hover { background: #eee8dc; }
+
+        #formulaStatus, #askStatus {
+            margin: 12px 0 0;
+            font-size: 14px;
+        }
+
+        .answer-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: #faf8f4;
+            border: 1px solid #e9e4da;
+            border-radius: 12px;
+        }
+
+        .answer-box h3 { margin-top: 0; }
+
+        #answerText {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #eeeae2;
+        }
+
+        th { background: #f3f0e9; font-size: 14px; }
+
+        td:not(:first-child), th:not(:first-child) {
+            text-align: center;
+        }
+
+        .total-row { font-weight: bold; background: #f8f6f1; }
+
+        .formula-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .formula-card {
+            padding: 18px;
+            background: #faf8f4;
+            border: 1px solid #e9e4da;
+            border-radius: 12px;
+        }
+
+        .formula-card h3 { margin-top: 0; }
+        .formula-card p { color: #5f5c53; }
+
+        #additionalIngredients { padding-left: 22px; }
+        #additionalIngredients li { margin-bottom: 10px; }
+
+        .disclaimer {
+            color: #716e65;
+            font-size: 13px;
+        }
+
+        [hidden] { display: none !important; }
+
+        @media (max-width: 700px) {
+            .container { width: 94%; padding-top: 24px; }
+            .panel { padding: 18px; }
+            .formula-cards { grid-template-columns: 1fr; }
+            th, td { padding: 9px 7px; font-size: 13px; }
+        }
+    </style>
+</head>
+
+<body>
+<main class="container">
+    <header>
+        <div class="eyebrow">DỰ ÁN ỨNG DỤNG TRÍ TUỆ NHÂN TẠO</div>
+        <h1>AI Perfume Lab</h1>
+        <p class="subtitle">
+            Trợ lý nước hoa thông minh — thiết kế ý tưởng mùi hương,
+            tìm hiểu vai trò của nguyên liệu và khám phá khoa học
+            đằng sau các công thức nước hoa.
+        </p>
+    </header>
+
+    <section class="panel">
+        <span class="section-label">CHỨC NĂNG 01</span>
+        <h2>Thiết kế công thức nước hoa</h2>
+        <p class="hint">
+            Mô tả mùi hương bạn muốn. AI sẽ đề xuất ba ý tưởng để bạn
+            so sánh. Bạn có thể nhập bằng tiếng Việt hoặc tiếng Anh.
+        </p>
+
+        <textarea id="request" maxlength="1500"
+            placeholder="Ví dụ: Tôi muốn một mùi hương tươi mát, thanh lịch, hơi ngọt và phù hợp để sử dụng hằng ngày..."></textarea>
+
+        <button id="analyze" type="button">Tạo 3 công thức</button>
+        <p id="formulaStatus" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+        <span class="section-label">CHỨC NĂNG 02</span>
+        <h2>Hỏi đáp chuyên gia nước hoa AI</h2>
+        <p class="hint">
+            Đặt câu hỏi về nguyên liệu, sự thay đổi mùi hương, độ hòa tan
+            hoặc các hiện tượng thường gặp. AI sẽ giải thích nguyên lý
+            và nêu những điểm cần kiểm tra khi chưa đủ dữ kiện.
+        </p>
+
+        <div class="question-examples">
+            <button type="button" class="example-button"
+                data-question="Nếu tăng tỷ lệ vani trong công thức, mùi hương có thể thay đổi như thế nào?">
+                Tăng vani thì sao?
+            </button>
+
+            <button type="button" class="example-button"
+                data-question="Tại sao hỗn hợp nước hoa có thể bị đục? Có những nguyên nhân nào cần xem xét?">
+                Vì sao hỗn hợp bị đục?
+            </button>
+
+            <button type="button" class="example-button"
+                data-question="Hương đầu, hương giữa và hương cuối khác nhau như thế nào?">
+                Hương đầu, giữa và cuối
+            </button>
+
+            <button type="button" class="example-button"
+                data-question="Vai trò của ethanol trong một công thức nước hoa là gì?">
+                Vai trò của ethanol
+            </button>
+        </div>
+
+        <textarea id="question" maxlength="1500"
+            placeholder="Nhập câu hỏi của bạn về nước hoa..."></textarea>
+
+        <button id="askButton" type="button">Gửi câu hỏi</button>
+        <p id="askStatus" role="status" aria-live="polite"></p>
+
+        <div id="answerBox" class="answer-box" hidden>
+            <h3>Giải đáp từ AI</h3>
+            <div id="answerText"></div>
+        </div>
+    </section>
+
+    <section class="panel" id="results" hidden>
+        <span class="section-label">KẾT QUẢ PHÂN TÍCH</span>
+        <h2>So sánh thành phần</h2>
+        <p class="hint">
+            Tỷ lệ được biểu thị bằng phần trăm (%) của tổng công thức.
+        </p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Thành phần</th>
+                        <th>Công thức A</th>
+                        <th>Công thức B</th>
+                        <th>Công thức C</th>
+                    </tr>
+                </thead>
+                <tbody id="formulaRows"></tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td>Tổng tỷ lệ</td>
+                        <td id="totalA">—</td>
+                        <td id="totalB">—</td>
+                        <td id="totalC">—</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel" id="explanationSection" hidden>
+        <h2>Đặc điểm của từng công thức</h2>
+        <div class="formula-cards">
+            <article class="formula-card">
+                <h3>🍋 Công thức A — Tươi mát</h3>
+                <p id="explanationA"></p>
+            </article>
+
+            <article class="formula-card">
+                <h3>🌿 Công thức B — Cân bằng</h3>
+                <p id="explanationB"></p>
+            </article>
+
+            <article class="formula-card">
+                <h3>🪵 Công thức C — Hương gỗ</h3>
+                <p id="explanationC"></p>
+            </article>
+        </div>
+    </section>
+
+    <section class="panel" id="additionalSection" hidden>
+        <h2>Nguyên liệu có thể tham khảo thêm</h2>
+        <p class="hint">
+            Đây là các gợi ý riêng, chưa được thêm vào ba công thức bên trên.
+        </p>
+        <ul id="additionalIngredients"></ul>
+    </section>
+
+    <footer class="panel disclaimer">
+        <strong>Lưu ý:</strong> Dự án phục vụ mục đích học tập và minh họa
+        khả năng ứng dụng AI. Các công thức chỉ mang tính ý tưởng, chưa
+        được kiểm nghiệm về độ an toàn, độ ổn định hoặc mức độ phù hợp
+        khi sử dụng trên da. Câu trả lời của AI cũng cần được đối chiếu
+        với tài liệu kỹ thuật đáng tin cậy khi cần đưa ra kết luận thực tế.
+    </footer>
+</main>
+
+<script>
+    const ingredientNames = {
+        bergamot: "Bergamot FCF",
+        sweet_orange: "Cam ngọt",
+        lavender: "Oải hương",
+        geranium: "Phong lữ",
+        cedarwood: "Hương gỗ tuyết tùng",
+        sandalwood: "Hương gỗ đàn hương",
+        vanilla: "Hương vani",
+        ethanol: "Ethanol (dung môi)"
+    };
+
+    const formulaButton = document.getElementById("analyze");
+    const formulaStatus = document.getElementById("formulaStatus");
+    const askButton = document.getElementById("askButton");
+    const askStatus = document.getElementById("askStatus");
+    const questionInput = document.getElementById("question");
+    const answerBox = document.getElementById("answerBox");
+    const answerText = document.getElementById("answerText");
+
+    function formatPercent(value) {
+        return Number(value).toLocaleString("vi-VN", {
+            maximumFractionDigits: 2
+        }) + "%";
+    }
+
+    function showStatus(element, message, isError = false) {
+        element.textContent = message;
+        element.style.color = isError ? "#b42318" : "#287447";
+    }
+
+    // Chọn câu hỏi mẫu
+    document.querySelectorAll("[data-question]").forEach(button => {
+        button.addEventListener("click", () => {
+            questionInput.value = button.dataset.question;
+            questionInput.focus();
+        });
+    });
+
+    // Chức năng hỏi đáp
+    async function askQuestion() {
+        const question = questionInput.value.trim();
+
+        if (!question) {
+            showStatus(askStatus, "Bạn hãy nhập câu hỏi trước nhé.", true);
+            questionInput.focus();
+            return;
+        }
+
+        askButton.disabled = true;
+        askButton.textContent = "Đang tìm câu trả lời...";
+        answerBox.hidden = true;
+        showStatus(askStatus, "AI đang phân tích câu hỏi của bạn...", false);
+
+        try {
+            const response = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Không thể trả lời lúc này.");
+            }
+
+            if (typeof data.answer !== "string" || !data.answer.trim()) {
+                throw new Error("AI chưa trả về câu trả lời hợp lệ.");
+            }
+
+            // Dùng textContent để hiển thị văn bản an toàn.
+            answerText.textContent = data.answer;
+            answerBox.hidden = false;
+            showStatus(askStatus, "Đã nhận được câu trả lời.");
+        } catch (error) {
+            showStatus(
+                askStatus,
+                error.message || "Đã xảy ra lỗi. Vui lòng thử lại.",
+                true
+            );
+        } finally {
+            askButton.disabled = false;
+            askButton.textContent = "Gửi câu hỏi";
+        }
+    }
+
+    askButton.addEventListener("click", askQuestion);
+
+    questionInput.addEventListener("keydown", event => {
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+            askQuestion();
+        }
+    });
+
+    // Chức năng tạo ba công thức
+    formulaButton.addEventListener("click", async () => {
+        const fragranceRequest = document.getElementById("request").value.trim();
+
+        if (!fragranceRequest) {
+            showStatus(
+                formulaStatus,
+                "Bạn hãy mô tả mùi hương mình muốn trước nhé.",
+                true
+            );
+            return;
+        }
+
+        formulaButton.disabled = true;
+        formulaButton.textContent = "Đang tạo công thức...";
+        showStatus(formulaStatus, "AI đang thiết kế ba ý tưởng mùi hương...");
+        document.getElementById("results").hidden = true;
+        document.getElementById("explanationSection").hidden = true;
+        document.getElementById("additionalSection").hidden = true;
+
+        try {
+            const response = await fetch("/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ request: fragranceRequest })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Không thể tạo công thức.");
+            }
+
+            const formulas = data.formulas;
+            const names = ["A", "B", "C"];
+            const keys = Object.keys(ingredientNames);
+
+            if (!formulas || !data.explanations) {
+                throw new Error("Dữ liệu công thức không hợp lệ.");
+            }
+
+            for (const name of names) {
+                if (!formulas[name]) {
+                    throw new Error("AI chưa tạo đủ ba công thức.");
+                }
+
+                for (const key of keys) {
+                    const value = formulas[name][key];
+
+                    if (
+                        typeof value !== "number" ||
+                        !Number.isFinite(value) ||
+                        value < 0 ||
+                        value > 100
+                    ) {
+                        throw new Error("Có tỷ lệ thành phần không hợp lệ.");
+                    }
+                }
+
+                const total = keys.reduce(
+                    (sum, key) => sum + formulas[name][key], 0
+                );
+
+                if (Math.abs(total - 100) > 0.01) {
+                    throw new Error(
+                        `Công thức ${name} không có tổng tỷ lệ bằng 100%. Hãy thử lại.`
+                    );
+                }
+
+                const explanation = data.explanations[name];
+
+                if (typeof explanation !== "string" || !explanation.trim()) {
+                    throw new Error("AI chưa giải thích đủ ba công thức.");
+                }
+            }
+
+            const tbody = document.getElementById("formulaRows");
+            tbody.replaceChildren();
+
+            for (const key of keys) {
+                const row = document.createElement("tr");
+                const nameCell = document.createElement("td");
+                nameCell.textContent = ingredientNames[key];
+                row.appendChild(nameCell);
+
+                for (const name of names) {
+                    const cell = document.createElement("td");
+                    cell.textContent = formatPercent(formulas[name][key]);
+                    row.appendChild(cell);
+                }
+
+                tbody.appendChild(row);
+            }
+
+            for (const name of names) {
+                const total = keys.reduce(
+                    (sum, key) => sum + formulas[name][key], 0
+                );
+
+                document.getElementById("total" + name).textContent =
+                    formatPercent(total);
+
+                document.getElementById("explanation" + name).textContent =
+                    data.explanations[name];
+            }
+
+            const suggestions = Array.isArray(data.additional_ingredients)
+                ? data.additional_ingredients
+                : [];
+
+            const list = document.getElementById("additionalIngredients");
+            list.replaceChildren();
+
+            for (const item of suggestions) {
+                if (!item || typeof item.name !== "string") continue;
+
+                const li = document.createElement("li");
+                const strong = document.createElement("strong");
+                strong.textContent = item.name;
+                li.appendChild(strong);
+
+                if (typeof item.reason === "string" && item.reason.trim()) {
+                    li.appendChild(
+                        document.createTextNode(": " + item.reason)
+                    );
+                }
+
+                list.appendChild(li);
+            }
+
+            document.getElementById("results").hidden = false;
+            document.getElementById("explanationSection").hidden = false;
+            document.getElementById("additionalSection").hidden =
+                suggestions.length === 0;
+
+            showStatus(
+                formulaStatus,
+                "Đã tạo thành công ba công thức để bạn so sánh."
+            );
+        } catch (error) {
+            showStatus(
+                formulaStatus,
+                error.message || "Đã xảy ra lỗi. Vui lòng thử lại.",
+                true
+            );
+        } finally {
+            formulaButton.disabled = false;
+            formulaButton.textContent = "Tạo 3 công thức";
+        }
+    });
+</script>
+</body>
+</html>
